@@ -1,0 +1,181 @@
+_target_: diffusion_policy.workspace.train_diffusion_unet_hybrid_workspace.TrainDiffusionUnetHybridWorkspace
+checkpoint:
+  save_last_ckpt: true
+  save_last_snapshot: true
+  topk:
+    format_str: epoch={epoch:04d}-val_mean_score={val_mean_score:.3f}.ckpt
+    k: 3
+    mode: max
+    monitor_key: val_mean_score
+dataloader:
+  batch_size: 32
+  num_workers: 4
+  persistent_workers: true
+  pin_memory: false
+  shuffle: true
+dataset_obs_steps: 3
+ema:
+  _target_: diffusion_policy.model.diffusion.ema_model.EMAModel
+  inv_gamma: 0.9
+  max_value: 0.99
+  min_value: 0.1
+  power: 0.5
+  update_after_step: 100
+exp_name: experimental_run
+horizon: 10
+keypoint_visible_rate: 0.9
+logging:
+  group: experiment_group
+  id: experiment_001
+  mode: offline
+  name: QYJS_train_diffusion_unet_hybrid_experiment
+  project: diffusion_policy_experiment
+  resume: false
+  tags:
+  - experimental_diffusion
+  - hybrid_model
+multi_run:
+  run_dir: data/outputs/2023.01.16/21.45.10_experiment_diffusion_unet_hybrid
+  wandb_name_base: 2023.01.16-21.45.10_experiment_diffusion_unet_hybrid
+n_action_steps: 10
+n_latency_steps: 1
+n_obs_steps: 3
+name: train_diffusion_unet_hybrid_experiment
+obs_as_global_cond: false
+optimizer:
+  _target_: torch.optim.Adam
+  betas:
+  - 0.9
+  - 0.999
+  eps: 1.0e-07
+  lr: 0.00005
+  weight_decay: 1.0e-05
+past_action_visible: true
+policy:
+  _target_: diffusion_policy.policy.diffusion_unet_hybrid_image_policy.DiffusionUnetHybridImagePolicy
+  cond_predict_scale: false
+  crop_shape:
+  - 64
+  - 64
+  diffusion_step_embed_dim: 256
+  down_dims:
+  - 256
+  - 512
+  - 1024
+  eval_fixed_crop: false
+  horizon: 10
+  kernel_size: 3
+  n_action_steps: 10
+  n_groups: 4
+  n_obs_steps: 3
+  noise_scheduler:
+    _target_: diffusers.schedulers.scheduling_ddpm.DDPMScheduler
+    beta_end: 0.01
+    beta_schedule: linear
+    beta_start: 0.00005
+    clip_sample: false
+    num_train_timesteps: 200
+    prediction_type: epsilon
+    variance_type: fixed_large
+  num_inference_steps: 50
+  obs_as_global_cond: false
+  obs_encoder_group_norm: false
+  shape_meta:
+    action:
+      shape:
+      - 2
+    obs:
+      agent_pos:
+        shape:
+        - 2
+        type: low_dim
+      image:
+        shape:
+        - 3
+        - 64
+        - 64
+        type: rgb
+shape_meta:
+  action:
+    shape:
+    - 2
+  obs:
+    agent_pos:
+      shape:
+      - 2
+      type: low_dim
+    image:
+      shape:
+      - 3
+      - 64
+      - 64
+      type: rgb
+task:
+  dataset:
+    _target_: diffusion_policy.dataset.pusht_image_dataset.PushTImageDataset
+    horizon: 10
+    max_train_episodes: 50
+    pad_after: 5
+    pad_before: 2
+    seed: 100
+    val_ratio: 0.05
+    zarr_path: data/pusht/pusht_cchi_v8_replay.zarr
+  env_runner:
+    _target_: diffusion_policy.env_runner.pusht_image_runner.PushTImageRunner
+    fps: 12
+    legacy_test: false
+    max_steps: 200
+    n_action_steps: 10
+    n_envs: 1
+    n_obs_steps: 3
+    n_test: 30
+    n_test_vis: 3
+    n_train: 4
+    n_train_vis: 1
+    past_action: true
+    test_start_seed: 200000
+    train_start_seed: 50
+  image_shape:
+  - 3
+  - 64
+  - 64
+  name: experimental_pusht_image
+  shape_meta:
+    action:
+      shape:
+      - 2
+    obs:
+      agent_pos:
+        shape:
+        - 2
+        type: low_dim
+      image:
+        shape:
+        - 3
+        - 64
+        - 64
+        type: rgb
+task_name: experimental_pusht_image
+training:
+  checkpoint_every: 25
+  debug: true
+  device: cuda:1
+  gradient_accumulate_every: 2
+  lr_scheduler: linear
+  lr_warmup_steps: 1000
+  max_train_steps: 5000
+  max_val_steps: 500
+  num_epochs: 1500
+  resume: false
+  rollout_every: 25
+  sample_every: 10
+  seed: 100
+  tqdm_interval_sec: 0.5
+  use_ema: false
+  val_every: 5
+val_dataloader:
+  batch_size: 32
+  num_workers: 4
+  persistent_workers: true
+  pin_memory: false
+  shuffle: false
